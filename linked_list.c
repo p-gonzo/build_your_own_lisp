@@ -1,13 +1,24 @@
 #include<stdio.h> 
 #include<stdlib.h>
 
-struct Node
+typedef struct Node
 {
     int data;
     struct Node *next;
-};
+    struct Node* (*push)(struct Node*, int value);
+} Node;
 
-void printList(struct Node *n) 
+Node* addToTail(struct Node* self, int value) {
+    Node* nextNode = NULL;
+    nextNode = malloc(sizeof(Node));
+    nextNode->data = value;
+    nextNode->next = NULL;
+    nextNode->push = addToTail;
+    self->next = nextNode;
+    return nextNode;
+}
+
+void printList(Node *n) 
 { 
     while (n != NULL) 
     { 
@@ -19,21 +30,15 @@ void printList(struct Node *n)
 int main(int argc, char** argv)
 {
 
-    struct Node* head = NULL; 
-    struct Node* second = NULL; 
-    struct Node* third = NULL;
+    Node* head = NULL;     
     
-    // allocate 3 nodes in the heap   
-    head = (struct Node*)malloc(sizeof(struct Node));  
-    second = (struct Node*)malloc(sizeof(struct Node)); 
-    third = (struct Node*)malloc(sizeof(struct Node));
-
+    head = (Node*)malloc(sizeof(Node));
     head->data = 1;
-    head->next = second;
-    second->data = 2;
-    second->next = third;
-    third->data = 3;
-    third->next = NULL;
+    head->push = addToTail;
+    head->next = NULL;
+
+    Node *node1 = head->push(head, 2);
+    Node *node2 = node1->push(node1, 3);
 
     printList(head);
 }
