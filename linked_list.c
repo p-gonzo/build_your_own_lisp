@@ -1,45 +1,67 @@
 #include<stdio.h> 
 #include<stdlib.h>
 
-typedef struct Node
-{
+typedef struct Node {
     int data;
     struct Node *next;
     struct Node* (*push)(struct Node*, int value);
 } Node;
 
-Node* addToTail(struct Node* self, int value) {
+Node* pushToNode(struct Node* self, int value) {
     Node* nextNode = NULL;
     nextNode = malloc(sizeof(Node));
     nextNode->data = value;
     nextNode->next = NULL;
-    nextNode->push = addToTail;
+    nextNode->push = pushToNode;
     self->next = nextNode;
     return nextNode;
 }
 
-void printList(Node *n) 
-{ 
-    while (n != NULL) 
-    { 
+typedef struct LinkedList {
+    struct Node *head;
+    struct Node *tail;
+    void (*addToTail)(struct LinkedList*, int value);
+} LinkedList;
+
+
+void addToTail(struct LinkedList* self, int value){
+    if (self->head == NULL) {
+        Node* head = NULL;
+        head = (Node*)malloc(sizeof(Node));
+        head->data = value;
+        head->push = pushToNode;
+        head->next = NULL;
+        self->head = head;
+        self->tail = head;
+    } else {
+        self->tail = self->tail->push(self->tail, value);
+    }
+};
+
+void printList(Node *n) { 
+    while (n != NULL) { 
         printf(" %d ", n->data); 
         n = n->next; 
     } 
 }
 
-int main(int argc, char** argv)
-{
+LinkedList* initializeLinkedList() {
+    LinkedList* ll = NULL;
+    ll = (LinkedList*)malloc(sizeof(LinkedList));
+    ll->head = NULL;
+    ll->tail = NULL;
+    ll->addToTail = addToTail;
+    return ll;
+};
 
-    Node* head = NULL;     
-    
-    head = (Node*)malloc(sizeof(Node));
-    head->data = 1;
-    head->push = addToTail;
-    head->next = NULL;
+int main(int argc, char** argv) {
 
-    Node *node1 = head->push(head, 2);
-    Node *node2 = node1->push(node1, 3);
+    LinkedList* ll = initializeLinkedList();
 
-    printList(head);
+    for (int i=0; i<10000; i ++) {
+        ll->addToTail(ll, i);
+    }
+
+    printList(ll->head);
 }
 
