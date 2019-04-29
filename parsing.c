@@ -23,7 +23,18 @@ char os[] = "OSX";
 #include<editline/readline.h>
 #endif
 
-
+int number_of_nodes(mpc_ast_t* t) {
+  printf("%s %s\n ", t->tag, t->contents);
+  if (t->children_num == 0) { return 1; }
+  if (t->children_num >= 1) {
+    int total = 1;
+    for (int i = 0; i < t->children_num; i++) {
+      total = total + number_of_nodes(t->children[i]);
+    }
+    return total;
+  }
+  return 0;
+}
 
 
 int main(int argc, char** argv) {
@@ -54,7 +65,9 @@ int main(int argc, char** argv) {
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, Lispy, &r)) {
       /* On success, print AST */
-      mpc_ast_print(r.output);
+      // mpc_ast_print(r.output);
+      printf("The total number of nodes was: %i\n", number_of_nodes(r.output));
+      
       mpc_ast_delete(r.output);
     } else {
       /* Otherwise, print the error */
